@@ -1,4 +1,4 @@
-name: Build Kizil Elma Android 0.7.5 APK
+name: Build Kizil Elma Android 0.7.6 APK
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
       - ".github/patches/patch_0_7_1.py"
       - ".github/patches/patch_0_7_2.py"
       - ".github/patches/patch_0_7_3.py"
-      - ".github/patches/patch_0_7_5.py"
+      - ".github/patches/patch_0_7_5.py"\n      - ".github/patches/patch_0_7_6.py"
   workflow_dispatch:
 
 permissions:
@@ -107,6 +107,19 @@ jobs:
           grep -q 'Konuşma algılanıyor...' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
           python3 -c "import xml.etree.ElementTree as E; from pathlib import Path; [E.parse(p) for p in Path('app/src/main').rglob('*.xml')]"
 
+      - name: Apply v0.7.6 offline network-permission hardening
+        run: |
+          cp .github/patches/patch_0_7_6.py kizil-work/patch_0_7_6.py
+          cd kizil-work
+          python3 -m py_compile patch_0_7_6.py
+          python3 patch_0_7_6.py
+          grep -q 'versionCode = 27' app/build.gradle.kts
+          grep -q 'versionName = "0.7.6"' app/build.gradle.kts
+          grep -q 'android.permission.INTERNET' app/src/main/AndroidManifest.xml
+          grep -q 'android.permission.ACCESS_NETWORK_STATE' app/src/main/AndroidManifest.xml
+          grep -q 'node="remove"' app/src/main/AndroidManifest.xml
+          python3 -c "import xml.etree.ElementTree as E; from pathlib import Path; [E.parse(p) for p in Path('app/src/main').rglob('*.xml')]"
+
       - name: Run unit tests and build debug APK
         working-directory: kizil-work
         run: ./gradlew --no-daemon --stacktrace :app:clean :app:testDebugUnitTest :app:assembleDebug
@@ -114,13 +127,13 @@ jobs:
       - name: Prepare directly downloadable APK
         run: |
           test -s kizil-work/app/build/outputs/apk/debug/app-debug.apk
-          cp kizil-work/app/build/outputs/apk/debug/app-debug.apk KizilElmaMobil-0.7.5-debug.apk
+          cp kizil-work/app/build/outputs/apk/debug/app-debug.apk KizilElmaMobil-0.7.6-debug.apk
           test -s KizilElmaMobil-0.7.5-debug.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KizilElmaMobil-0.7.5-debug-apk
+          name: KizilElmaMobil-0.7.6-debug-apk
           path: KizilElmaMobil-0.7.5-debug.apk
           if-no-files-found: error
           retention-days: 90
@@ -129,8 +142,8 @@ jobs:
       - name: Publish direct APK download in GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.7.5-build-${{ github.run_number }}
-          name: Kızıl Elma Mobil v0.7.5 (Build ${{ github.run_number }})
+          tag_name: v0.7.6-build-${{ github.run_number }}
+          name: Kızıl Elma Mobil v0.7.6 (Build ${{ github.run_number }})
           body: |
             Kızıl Elma Mobil v0.7.5
             Version Code: 26
