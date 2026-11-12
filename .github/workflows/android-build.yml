@@ -90,6 +90,7 @@ jobs:
           grep -q 'ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
           grep -q 'class AutonomousSessionService' app/src/main/java/com/kizilelma/mobile/AutonomousSessionService.kt
           grep -q 'foregroundServiceType="specialUse"' app/src/main/AndroidManifest.xml
+          grep -q 'xmlns:android="http://schemas.android.com/apk/res/android"' app/src/main/AndroidManifest.xml
           python3 -c "import xml.etree.ElementTree as E; from pathlib import Path; [E.parse(p) for p in Path('app/src/main').rglob('*.xml')]"
 
       - name: Run unit tests and build debug APK
