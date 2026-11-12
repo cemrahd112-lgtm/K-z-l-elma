@@ -1,4 +1,4 @@
-name: Build Kizil Elma Android 0.6.6 APK
+name: Build Kizil Elma Android 0.6.7 APK
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - "KizilElmaMobil_0.6.4-chat-ui-source.zip"
       - ".github/workflows/android-build.yml"
       - ".github/patches/patch_0_6_6.py"
+      - ".github/patches/patch_0_6_7.py"
   workflow_dispatch:
 
 permissions:
@@ -42,15 +43,23 @@ jobs:
           test -f kizil-work/gradlew
           chmod +x kizil-work/gradlew
 
-      - name: Apply v0.6.6 local AI routing patch
+      - name: Apply v0.6.6 compatibility and local AI patch
         run: |
           cp .github/patches/patch_0_6_6.py kizil-work/patch_0_6_6.py
           cd kizil-work
           python3 patch_0_6_6.py
           grep -q 'versionCode = 19' app/build.gradle.kts
           grep -q 'versionName = "0.6.6"' app/build.gradle.kts
-          grep -q 'sendMessage(safePrompt).contents.toString()' app/src/main/java/com/kizilelma/mobile/assistant/LocalLlmEngine.kt
-          grep -q 'loadExistingLocalModelIfPresent()' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
+
+      - name: Apply v0.6.7 device-fix patch
+        run: |
+          cp .github/patches/patch_0_6_7.py kizil-work/patch_0_6_7.py
+          cd kizil-work
+          python3 patch_0_6_7.py
+          grep -q 'versionCode = 20' app/build.gradle.kts
+          grep -q 'versionName = "0.6.7"' app/build.gradle.kts
+          grep -q 'SpeechRecognizer.createSpeechRecognizer(this)' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
+          grep -q 'EXPECTED_SHA256' app/src/main/java/com/kizilelma/mobile/assistant/ModelDownloader.kt
 
       - name: Run unit tests and build debug APK
         working-directory: kizil-work
@@ -59,7 +68,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: KizilElmaMobil-0.6.6-debug
+          name: KizilElmaMobil-0.6.7-debug
           path: kizil-work/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
