@@ -38,6 +38,7 @@ jobs:
           mkdir source
           unzip -q KizilElmaMobil_0.6.3-beta_fixed.zip -d source
           chmod +x source/gradlew
+          sed -i 's/sendMessage(safePrompt)\.text\.trim()/sendMessage(safePrompt).toString().trim()/' source/app/src/main/java/com/kizilelma/mobile/assistant/LocalLlmEngine.kt
 
       - name: Build APK
         working-directory: source
