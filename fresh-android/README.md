@@ -16,3 +16,6 @@ This APK is an offline-capable shell, not a preloaded model bundle. GGUF and Vos
 GitHub Actions downloads llama.cpp source at build time and compiles the native arm64 library. This build-time source fetch is performed by CI; the installed APK has no network permission.
 
 CI build workflow: `.github/workflows/kizil-elma-v1.yml`.
+
+
+CI note: Android NDK and CMake are installed by the GitHub Actions workflow using the SDK Manager.
