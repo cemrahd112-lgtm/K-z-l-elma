@@ -11,7 +11,8 @@ on:
       - ".github/patches/patch_0_7_1.py"
       - ".github/patches/patch_0_7_2.py"
       - ".github/patches/patch_0_7_3.py"
-      - ".github/patches/patch_0_7_5.py"\n      - ".github/patches/patch_0_7_6.py"
+      - ".github/patches/patch_0_7_5.py"
+      - ".github/patches/patch_0_7_6.py"
   workflow_dispatch:
 
 permissions:
