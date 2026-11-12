@@ -26,10 +26,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10.2"
-      - name: Set up Android SDK, NDK and CMake
-        uses: android-actions/setup-android@v3
       - name: Install native toolchain
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
       - name: Fetch llama.cpp source for native compilation
         run: git clone --depth 1 https://github.com/ggml-org/llama.cpp fresh-android/app/src/main/cpp/llama.cpp
       - name: Compile and test
