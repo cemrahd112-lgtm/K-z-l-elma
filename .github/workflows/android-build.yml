@@ -1,4 +1,4 @@
-name: Build Kizil Elma Android 0.7.0 APK
+name: Build Kizil Elma Android 0.7.1 APK
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - "KizilElmaMobil_0.6.4-chat-ui-source.zip"
       - ".github/workflows/android-build.yml"
       - ".github/patches/patch_0_7_0.py"
+      - ".github/patches/patch_0_7_1.py"
   workflow_dispatch:
 
 permissions:
@@ -42,7 +43,7 @@ jobs:
           test -f kizil-work/gradlew
           chmod +x kizil-work/gradlew
 
-      - name: Apply v0.7.0 major update
+      - name: Apply v0.7.0 baseline update
         run: |
           cp .github/patches/patch_0_7_0.py kizil-work/patch_0_7_0.py
           cd kizil-work
@@ -50,9 +51,18 @@ jobs:
           python3 patch_0_7_0.py
           grep -q 'versionCode = 21' app/build.gradle.kts
           grep -q 'versionName = "0.7.0"' app/build.gradle.kts
-          grep -q 'SpeechRecognizer.createOnDeviceSpeechRecognizer(this)' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
-          grep -q 'EXPECTED_SHA256' app/src/main/java/com/kizilelma/mobile/assistant/ModelDownloader.kt
-          grep -q 'Theme.Material3.Dark.NoActionBar' app/src/main/res/values/styles.xml
+
+      - name: Apply v0.7.1 critical fixes
+        run: |
+          cp .github/patches/patch_0_7_1.py kizil-work/patch_0_7_1.py
+          cd kizil-work
+          python3 -m py_compile patch_0_7_1.py
+          python3 patch_0_7_1.py
+          grep -q 'versionCode = 22' app/build.gradle.kts
+          grep -q 'versionName = "0.7.1"' app/build.gradle.kts
+          grep -q 'maxOutputToken = 192' app/src/main/java/com/kizilelma/mobile/assistant/LocalLlmEngine.kt
+          grep -q 'setTextIsSelectable(true)' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
+          grep -q 'Cihazın çevrimdışı ses tanıma servisi bağlantıyı kesti' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
           python3 -c "import xml.etree.ElementTree as E; from pathlib import Path; [E.parse(p) for p in Path('app/src/main').rglob('*.xml')]"
 
       - name: Run unit tests and build debug APK
@@ -62,7 +72,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: KizilElmaMobil-0.7.0-debug
+          name: KizilElmaMobil-0.7.1-debug
           path: kizil-work/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
