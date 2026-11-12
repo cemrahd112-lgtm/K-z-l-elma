@@ -55,6 +55,17 @@ m = m.replace(old_toggle, new_toggle, 1)
 # Keep the visible control state synchronized after any failure path that disables the loop.
 m = m.replace('binding.liveChatButton.text = "Canlı konuşma"', 'updateAutonomousButtonState()')
 m = m.replace('binding.liveChatButton.text = "Canlı sohbeti bitir"', 'updateAutonomousButtonState()')
+m = m.replace('''        if (forceLocalChat) {
+            askLocalModel(raw)
+            return
+        }
+''', '''        if (forceLocalChat) {
+            binding.statusText.text = "Kendi kendine düşünüyor..."
+            askLocalModel(raw)
+            return
+        }
+''', 1)
+
 m = m.replace('binding.statusText.text = "Düşünüyor..."', 'binding.statusText.text = "Kendi kendine düşünüyor..."')
 
 # Ensure autonomous mode is still enabled before the TTS completion callback restarts listening.
