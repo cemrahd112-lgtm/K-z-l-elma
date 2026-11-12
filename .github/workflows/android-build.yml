@@ -99,13 +99,13 @@ jobs:
         run: |
           test -s kizil-work/app/build/outputs/apk/debug/app-debug.apk
           cp kizil-work/app/build/outputs/apk/debug/app-debug.apk KizilElmaMobil-0.7.3-debug.apk
-          test -s KizilElmaMobil-0.7.2-debug.apk
+          test -s KizilElmaMobil-0.7.3-debug.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: KizilElmaMobil-0.7.3-debug-apk
-          path: KizilElmaMobil-0.7.2-debug.apk
+          path: KizilElmaMobil-0.7.3-debug.apk
           if-no-files-found: error
           retention-days: 90
           compression-level: 0
@@ -120,6 +120,6 @@ jobs:
             Version Code: 24
 
             Direct APK asset; no ZIP extraction required.
-          files: KizilElmaMobil-0.7.2-debug.apk
+          files: KizilElmaMobil-0.7.3-debug.apk
           fail_on_unmatched_files: true
           make_latest: false
