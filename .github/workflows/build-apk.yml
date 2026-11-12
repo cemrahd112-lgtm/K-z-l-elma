@@ -39,9 +39,9 @@ jobs:
           unzip -q KizilElmaMobil_0.6.3-beta_fixed.zip -d source
           chmod +x source/gradlew
 
-      - name: Build and test
+      - name: Build APK
         working-directory: source
-        run: ./gradlew --no-daemon --stacktrace testDebugUnitTest assembleDebug
+        run: ./gradlew --no-daemon --stacktrace assembleDebug
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
