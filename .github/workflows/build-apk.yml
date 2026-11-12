@@ -6,7 +6,6 @@ on:
       - v0.6.4-ui
     paths:
       - "KizilElmaMobil_0.6.4-chat-ui-source.zip"
-      - ".github/workflows/build-apk.yml"
   workflow_dispatch:
 
 permissions:
@@ -24,7 +23,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
 
       - name: Set up Android SDK 35
         uses: android-actions/setup-android@v3
