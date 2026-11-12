@@ -1,0 +1,71 @@
+name: Kizil Elma Mobil 1.0 Offline APK
+
+on:
+  push:
+    branches: [v1.0-offline-clean]
+    paths:
+      - "fresh-android/**"
+      - ".github/workflows/kizil-elma-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+      - name: Set up Android SDK, NDK and CMake
+        uses: android-actions/setup-android@v3
+      - name: Install native toolchain
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
+      - name: Fetch llama.cpp source for native compilation
+        run: git clone --depth 1 https://github.com/ggml-org/llama.cpp fresh-android/app/src/main/cpp/llama.cpp
+      - name: Compile and test
+        working-directory: fresh-android
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+        run: gradle --no-daemon --stacktrace :app:clean :app:testDebugUnitTest :app:assembleDebug
+      - name: Verify APK and network permissions
+        working-directory: fresh-android
+        run: |
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          PERMS="$(apkanalyzer manifest permissions "$APK")"
+          echo "$PERMS"
+          ! echo "$PERMS" | grep -q "android.permission.INTERNET"
+          ! echo "$PERMS" | grep -q "android.permission.ACCESS_NETWORK_STATE"
+          mkdir -p ../dist
+          cp "$APK" ../dist/KizilElmaMobil-1.0-debug.apk
+          sha256sum ../dist/KizilElmaMobil-1.0-debug.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KizilElmaMobil-1.0-debug-apk
+          path: dist/KizilElmaMobil-1.0-debug.apk
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
+      - name: Publish APK release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: kizil-elma-v1.0-build-${{ github.run_number }}
+          name: Kızıl Elma Mobil 1.0 (Build ${{ github.run_number }})
+          body: |
+            Kızıl Elma Mobil 1.0
+            Version Code: 1
+            Offline-first APK. GGUF and Vosk model files must be imported locally.
+          files: dist/KizilElmaMobil-1.0-debug.apk
+          fail_on_unmatched_files: true
+          make_latest: false
