@@ -1,4 +1,4 @@
-name: Build Kizil Elma Android 0.6.5 APK
+name: Build Kizil Elma Android 0.6.6 APK
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
     paths:
       - "KizilElmaMobil_0.6.4-chat-ui-source.zip"
       - ".github/workflows/android-build.yml"
+      - ".github/patches/patch_0_6_6.py"
   workflow_dispatch:
 
 permissions:
@@ -33,7 +34,7 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses
 
-      - name: Extract v0.6.4 Android source
+      - name: Extract Android source baseline
         run: |
           test -f KizilElmaMobil_0.6.4-chat-ui-source.zip
           mkdir -p kizil-work
@@ -41,33 +42,15 @@ jobs:
           test -f kizil-work/gradlew
           chmod +x kizil-work/gradlew
 
-      - name: Fix LiteRT-LM Message text extraction
+      - name: Apply v0.6.6 local AI routing patch
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          source = Path("kizil-work/app/src/main/java/com/kizilelma/mobile/assistant/LocalLlmEngine.kt")
-          content = source.read_text()
-          broken = "activeConversation.sendMessage(safePrompt).text.trim()"
-          fixed = "activeConversation.sendMessage(safePrompt).toString().trim()"
-          if broken not in content:
-              raise SystemExit("Expected LiteRT-LM Message.text expression was not found; refusing an unverified patch")
-          source.write_text(content.replace(broken, fixed, 1))
-          print("Patched Message.text to Message.toString()")
-          PY
-
-      - name: Set version to 0.6.5 (versionCode 18)
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("kizil-work/app/build.gradle.kts")
-          s = p.read_text()
-          if "versionCode = 17" not in s or 'versionName = "0.6.4"' not in s:
-              raise SystemExit("Expected 0.6.4 version fields were not found; refusing an unverified patch")
-          s = s.replace("versionCode = 17", "versionCode = 18", 1)
-          s = s.replace('versionName = "0.6.4"', 'versionName = "0.6.5"', 1)
-          p.write_text(s)
-          print("Version set to 0.6.5 (18)")
-          PY
+          cp .github/patches/patch_0_6_6.py kizil-work/patch_0_6_6.py
+          cd kizil-work
+          python3 patch_0_6_6.py
+          grep -q 'versionCode = 19' app/build.gradle.kts
+          grep -q 'versionName = "0.6.6"' app/build.gradle.kts
+          grep -q 'sendMessage(safePrompt).contents.toString()' app/src/main/java/com/kizilelma/mobile/assistant/LocalLlmEngine.kt
+          grep -q 'loadExistingLocalModelIfPresent()' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
 
       - name: Run unit tests and build debug APK
         working-directory: kizil-work
@@ -76,7 +59,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: KizilElmaMobil-0.6.5-debug
+          name: KizilElmaMobil-0.6.6-debug
           path: kizil-work/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
