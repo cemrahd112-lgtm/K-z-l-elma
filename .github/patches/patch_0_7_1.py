@@ -127,17 +127,22 @@ new_error = '''                            if (liveChatEnabled && error in listO
 '''
 if old_error not in m: raise SystemExit('Speech error handler block not found')
 m = m.replace(old_error, new_error, 1)
-old_missing = '''            appendChat("ASSISTANT", message)
-            if (liveChatEnabled) liveChatEnabled = false
+old_missing = '''        if (Build.VERSION.SDK_INT < 31 || !SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+            binding.statusText.text = "Çevrimdışı STT kullanılamıyor"
+            appendChat("ASSISTANT", "Bu cihazda yerel çevrimdışı konuşma tanıma hizmeti bulunamadı. Ağ üzerinden tanımaya geçilmedi.")
+            liveChatEnabled = false
+            binding.liveChatButton.text = "Canlı konuşma"
             return
+        }
 '''
-new_missing = '''            appendChat("ASSISTANT", "$message Metin girişini kullanabilirsiniz.")
-            if (liveChatEnabled) {
-                liveChatEnabled = false
-                binding.liveChatButton.text = "Canlı konuşma"
-            }
+new_missing = '''        if (Build.VERSION.SDK_INT < 31 || !SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+            val message = "Bu cihazda yerel çevrimdışı konuşma tanıma hizmeti bulunamadı."
             binding.statusText.text = "Metin girişine dönüldü"
+            appendChat("ASSISTANT", "$message Metin girişini kullanabilirsiniz.")
+            liveChatEnabled = false
+            binding.liveChatButton.text = "Canlı konuşma"
             return
+        }
 '''
 if old_missing not in m: raise SystemExit('Missing speech service fallback block not found')
 m = m.replace(old_missing, new_missing, 1)
