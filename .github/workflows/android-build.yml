@@ -86,7 +86,7 @@ jobs:
           python3 -m py_compile patch_0_7_3.py
           python3 patch_0_7_3.py
           grep -q 'versionCode = 24' app/build.gradle.kts
-          grep -q 'versionName = "0.7.5"' app/build.gradle.kts
+          grep -q 'versionName = "0.7.3"' app/build.gradle.kts
           grep -q 'Lütfen cihaz ayarlarından çevrimdışı Türkçe dil paketini indirin' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
           grep -q 'ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
           grep -q 'class AutonomousSessionService' app/src/main/java/com/kizilelma/mobile/AutonomousSessionService.kt
