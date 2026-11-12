@@ -23,11 +23,12 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android platform
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      # GitHub-hosted Ubuntu runners already include Android command-line tools.
+      # Avoid android-actions/setup-android@v3: it requests the removed "tools" SDK package.
+      - name: Accept Android SDK licenses and install required packages
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Extract source archive
         run: |
@@ -37,7 +38,7 @@ jobs:
 
       - name: Build and test
         working-directory: source
-        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+        run: ./gradlew --no-daemon --stacktrace testDebugUnitTest assembleDebug
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
