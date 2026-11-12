@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "com.kizilelma.mobile"
     compileSdk = 35
+    ndkVersion = "27.0.12077973"
     defaultConfig {
         applicationId = "com.kizilelma.mobile"
         minSdk = 26
