@@ -81,8 +81,8 @@ voice="""    @Deprecated("Activity result kept for compatibility with the projec
                     if (Build.VERSION.SDK_INT >= 26) startForegroundService(serviceIntent) else startService(serviceIntent)
                     binding.statusText.text = "Ekran analizi başlatılıyor"
                 } catch (failure: Exception) {
-                    binding.statusText.text = "Ekran servisi başlatılamadı: \${failure.localizedMessage}"
-                    appendChat("ASSISTANT", "Ekran servisi başlatılamadı: \${failure.localizedMessage}")
+                    binding.statusText.text = "Ekran servisi başlatılamadı: ${failure.localizedMessage}"
+                    appendChat("ASSISTANT", "Ekran servisi başlatılamadı: ${failure.localizedMessage}")
                 }
             } else binding.statusText.text = "Ekran izni verilmedi"
         }
@@ -166,7 +166,7 @@ voice="""    @Deprecated("Activity result kept for compatibility with the projec
             binding.statusText.text = "Dinliyorum..."
             speechRecognizer?.startListening(speechIntent)
         } catch (failure: Exception) {
-            val detail = "Çevrimdışı mikrofon başlatılamadı: \${failure.localizedMessage ?: failure.javaClass.simpleName}"
+            val detail = "Çevrimdışı mikrofon başlatılamadı: ${failure.localizedMessage ?: failure.javaClass.simpleName}"
             binding.statusText.text = detail
             appendChat("ASSISTANT", detail)
             speechRecognizer?.destroy()
@@ -179,12 +179,12 @@ voice="""    @Deprecated("Activity result kept for compatibility with the projec
 """
 m=m[:a]+voice+m[b:]
 m=m.replace("    private fun processCommand(raw: String) {","    private fun processCommand(raw: String, forceLocalChat: Boolean = false) {",1)
-old="""        memory.save(raw, "\${command.type}: \${command.description}")
-        binding.resultText.text = "Algılanan komut: \${command.description}\\nİşlem: \${command.type}$correctionNotice"
+old="""        memory.save(raw, "${command.type}: ${command.description}")
+        binding.resultText.text = "Algılanan komut: ${command.description}\\nİşlem: ${command.type}$correctionNotice"
 
         when (command.type) {"""
-new="""        memory.save(raw, "\${command.type}: \${command.description}")
-        binding.resultText.text = if (forceLocalChat) "Düşünüyor..." else "Algılanan komut: \${command.description}\\nİşlem: \${command.type}$correctionNotice"
+new="""        memory.save(raw, "${command.type}: ${command.description}")
+        binding.resultText.text = if (forceLocalChat) "Düşünüyor..." else "Algılanan komut: ${command.description}\\nİşlem: ${command.type}$correctionNotice"
         if (forceLocalChat) {
             askLocalModel(raw)
             return
@@ -198,7 +198,7 @@ m=m.replace("binding.modelButton.isEnabled = true","setToolsModelButtonEnabled(t
 m=m.replace("        binding.modelStatusText.text = LocalModelStatus.describe(this)\n","",1)
 anchor="    private fun installOrLoadLocalModel() {"
 helpers="""    private fun autoLoadExistingLocalModel() {
-        val file = File(filesDir, "models/\${ModelDownloader.MODEL_NAME}")
+        val file = File(filesDir, "models/${ModelDownloader.MODEL_NAME}")
         modelOperationInProgress = true
         binding.statusText.text = "Model dosyası doğrulanıyor"
         binding.modelStatusText.text = "Qwen3-0.6B boyut ve SHA-256 kontrolü..."
@@ -287,7 +287,7 @@ m=m.replace('''        if (!llm.isReady()) {
             speak("Yerel yapay zekâ henüz hazır değil")
             return
         }''','''        if (!llm.isReady()) {
-            val notice = "Hata: Yerel model RAM'e yüklenmedi. Durum: \${binding.modelStatusText.text}"
+            val notice = "Hata: Yerel model RAM'e yüklenmedi. Durum: ${binding.modelStatusText.text}"
             binding.resultText.text = notice
             appendChat("ASSISTANT", notice)
             if (liveChatEnabled) startVoiceInput()
@@ -303,7 +303,7 @@ m=m.replace('''            } else {
             }''',1)
 oldT="""    private fun speak(message: String) {
         if (!voiceRepliesEnabled || message.isBlank()) return
-        tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "kizil-elma-\${System.currentTimeMillis()}")
+        tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "kizil-elma-${System.currentTimeMillis()}")
     }
 
     override fun onInit(status: Int) {
@@ -314,7 +314,7 @@ oldT="""    private fun speak(message: String) {
 """
 newT="""    private fun speak(message: String) {
         if (!voiceRepliesEnabled || !offlineTtsAvailable || message.isBlank()) return
-        tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "kizil-elma-\${System.currentTimeMillis()}")
+        tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "kizil-elma-${System.currentTimeMillis()}")
     }
 
     private fun speakLiveReply(message: String) {
@@ -326,7 +326,7 @@ newT="""    private fun speak(message: String) {
             return
         }
         binding.statusText.text = "Konuşuyorum..."
-        val result = tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "kizil-elma-live-\${System.currentTimeMillis()}")
+        val result = tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "kizil-elma-live-${System.currentTimeMillis()}")
         if (result != TextToSpeech.SUCCESS) startVoiceInput()
     }
 
@@ -400,7 +400,7 @@ if bubble not in m: raise SystemExit("bubble style anchor missing")
 m=m.replace(bubble,bubble2,1)
 M.write_text(m)
 e=e.replace("activeConversation.sendMessage(safePrompt).text.trim()","activeConversation.sendMessage(safePrompt).contents.toString().trim()",1)
-e=e.replace('error(callback, failure.localizedMessage ?: "Model yanıt üretemedi")','error(callback, "\${failure.javaClass.simpleName}: \${failure.localizedMessage ?: "Model yanıt üretemedi"}")',1)
+e=e.replace('error(callback, failure.localizedMessage ?: "Model yanıt üretemedi")','error(callback, "${failure.javaClass.simpleName}: ${failure.localizedMessage ?: "Model yanıt üretemedi"}")',1)
 E.write_text(e)
 (R/"app/src/main/res/values/styles.xml").write_text("""<resources>
 <style name="Theme.KizilElma" parent="Theme.Material3.Dark.NoActionBar">
