@@ -1,4 +1,4 @@
-name: Build Kizil Elma Android APK
+name: Build Kizil Elma Android 0.6.5 APK
 
 on:
   push:
@@ -53,6 +53,21 @@ jobs:
               raise SystemExit("Expected LiteRT-LM Message.text expression was not found; refusing an unverified patch")
           source.write_text(content.replace(broken, fixed, 1))
           print("Patched Message.text to Message.toString()")
+          PY
+
+      - name: Set version to 0.6.5 (versionCode 18)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("kizil-work/app/build.gradle.kts")
+          s = p.read_text()
+          s, n1 = re.subn(r'versionCode\\s*=\\s*\\d+', 'versionCode = 18', s, count=1)
+          s, n2 = re.subn(r'versionName\\s*=\\s*"[^"]+"', 'versionName = "0.6.5"', s, count=1)
+          if n1 != 1 or n2 != 1:
+              raise SystemExit(f"Version fields not found exactly once: versionCode={n1}, versionName={n2}")
+          p.write_text(s)
+          print("Version set to 0.6.5 (18)")
           PY
 
       - name: Run unit tests and build debug APK
