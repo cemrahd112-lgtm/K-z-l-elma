@@ -59,13 +59,12 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
           p = Path("kizil-work/app/build.gradle.kts")
           s = p.read_text()
-          s, n1 = re.subn(r'versionCode\\s*=\\s*\\d+', 'versionCode = 18', s, count=1)
-          s, n2 = re.subn(r'versionName\\s*=\\s*"[^"]+"', 'versionName = "0.6.5"', s, count=1)
-          if n1 != 1 or n2 != 1:
-              raise SystemExit(f"Version fields not found exactly once: versionCode={n1}, versionName={n2}")
+          if "versionCode = 17" not in s or 'versionName = "0.6.4"' not in s:
+              raise SystemExit("Expected 0.6.4 version fields were not found; refusing an unverified patch")
+          s = s.replace("versionCode = 17", "versionCode = 18", 1)
+          s = s.replace('versionName = "0.6.4"', 'versionName = "0.6.5"', 1)
           p.write_text(s)
           print("Version set to 0.6.5 (18)")
           PY
@@ -77,7 +76,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: KizilElmaMobil-0.6.4-debug
+          name: KizilElmaMobil-0.6.5-debug
           path: kizil-work/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
