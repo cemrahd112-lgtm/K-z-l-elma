@@ -6,6 +6,7 @@ on:
       - v0.6.4-ui
     paths:
       - "KizilElmaMobil_0.6.4-chat-ui-source.zip"
+      - ".github/workflows/android-build.yml"
   workflow_dispatch:
 
 permissions:
