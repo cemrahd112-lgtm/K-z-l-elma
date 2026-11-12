@@ -41,13 +41,26 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         store = LocalStore(this)
         tts = TextToSpeech(this, this)
         modelPath = File(filesDir, "model.gguf").takeIf { it.exists() }?.absolutePath
+        runCatching {
+            modelPath?.let { check(LlamaBridge.loadModel(it, 4096)) }
+            val localSpeech = File(filesDir, "vosk-model")
+            if (File(localSpeech, "am/final.mdl").exists()) voskModel = Model(localSpeech.absolutePath)
+        }
         setContent { Screen() }
     }
     override fun onInit(status: Int) {
         ttsReady = status == TextToSpeech.SUCCESS && (tts?.voices?.any { !it.isNetworkConnectionRequired && it.locale.language == "tr" } == true)
     }
+    override fun onResume() {
+        super.onResume()
+        val ready = modelPath != null && voskModel != null
+        if (ready && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            voiceLoop = true
+            beginListen()
+        }
+    }
     private fun beginListen() {
-        if (!voiceLoop || voskModel == null || speech != null) return
+        if (!voiceLoop || modelPath == null || voskModel == null || speech != null) return
         try {
             val recognizer = Recognizer(voskModel, 16000.0f)
             speech = SpeechService(recognizer, 16000.0f).also { service ->
@@ -88,7 +101,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         }
     }
     private val micPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) { voiceLoop = true; beginListen() }
+        if (granted && modelPath != null && voskModel != null) { voiceLoop = true; beginListen() }
     }
     @Composable private fun Screen() {
         var messages by remember { mutableStateOf(store.history()) }
