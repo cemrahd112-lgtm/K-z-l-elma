@@ -96,11 +96,7 @@ new_prompt = '''        val prompt = """
             </learning_data_untrusted>
         """.trimIndent()'''
 m = m[:start] + new_prompt + m[end:]
-old_error = '''                            if (liveChatEnabled && error in listOf(
-                                    SpeechRecognizer.ERROR_NO_MATCH,
-                                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT,
-                                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY
-                                )) {
+old_error = '''                            if (liveChatEnabled && error in listOf(SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT, SpeechRecognizer.ERROR_RECOGNIZER_BUSY)) {
                                 mainHandler.postDelayed({ if (liveChatEnabled) startVoiceInput() }, 700)
                             } else if (liveChatEnabled) {
                                 appendChat("ASSISTANT", "Çevrimdışı ses tanıma durdu. Hata kodu: $error")
@@ -108,10 +104,7 @@ old_error = '''                            if (liveChatEnabled && error in listO
                                 binding.liveChatButton.text = "Canlı konuşma"
                             }
 '''
-new_error = '''                            if (liveChatEnabled && error in listOf(
-                                    SpeechRecognizer.ERROR_NO_MATCH,
-                                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT
-                                )) {
+new_error = '''                            if (liveChatEnabled && error in listOf(SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT)) {
                                 mainHandler.postDelayed({ if (liveChatEnabled) startVoiceInput() }, 700)
                             } else {
                                 val explanation = when (error) {
