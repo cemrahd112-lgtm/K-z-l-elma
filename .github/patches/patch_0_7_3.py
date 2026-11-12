@@ -40,6 +40,8 @@ if not services:
         android + "name": "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE",
         android + "value": "User-visible offline autonomous assistant session"
     })
+ET.register_namespace("android", "http://schemas.android.com/apk/res/android")
+ET.register_namespace("tools", "http://schemas.android.com/tools")
 ET.indent(manifest, space="    ")
 manifest.write(A, encoding="utf-8", xml_declaration=True)
 
