@@ -1,0 +1,47 @@
+name: Build Android APK
+
+on:
+  push:
+    paths:
+      - "KizilElmaMobil_0.6.3-beta_fixed.zip"
+      - ".github/workflows/build-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Extract source archive
+        run: |
+          mkdir source
+          unzip -q KizilElmaMobil_0.6.3-beta_fixed.zip -d source
+          chmod +x source/gradlew
+
+      - name: Build and test
+        working-directory: source
+        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KizilElmaMobil-0.6.3-beta-debug
+          path: source/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
