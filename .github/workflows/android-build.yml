@@ -1,4 +1,4 @@
-name: Build Kizil Elma Android 0.7.1 APK
+name: Build Kizil Elma Android 0.7.2 APK
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - ".github/workflows/android-build.yml"
       - ".github/patches/patch_0_7_0.py"
       - ".github/patches/patch_0_7_1.py"
+      - ".github/patches/patch_0_7_2.py"
   workflow_dispatch:
 
 permissions:
@@ -35,7 +36,7 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses
 
-      - name: Extract existing Android source baseline
+      - name: Extract source baseline
         run: |
           test -f KizilElmaMobil_0.6.4-chat-ui-source.zip
           mkdir -p kizil-work
@@ -43,7 +44,7 @@ jobs:
           test -f kizil-work/gradlew
           chmod +x kizil-work/gradlew
 
-      - name: Apply v0.7.0 baseline update
+      - name: Apply v0.7.0 baseline
         run: |
           cp .github/patches/patch_0_7_0.py kizil-work/patch_0_7_0.py
           cd kizil-work
@@ -62,7 +63,18 @@ jobs:
           grep -q 'versionName = "0.7.1"' app/build.gradle.kts
           grep -q 'maxOutputToken = 192' app/src/main/java/com/kizilelma/mobile/assistant/LocalLlmEngine.kt
           grep -q 'setTextIsSelectable(true)' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
-          grep -q 'Cihazın çevrimdışı ses tanıma servisi bağlantıyı kesti' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
+
+      - name: Apply v0.7.2 autonomous chat mode
+        run: |
+          cp .github/patches/patch_0_7_2.py kizil-work/patch_0_7_2.py
+          cd kizil-work
+          python3 -m py_compile patch_0_7_2.py
+          python3 patch_0_7_2.py
+          grep -q 'versionCode = 23' app/build.gradle.kts
+          grep -q 'versionName = "0.7.2"' app/build.gradle.kts
+          grep -q 'Otonom Sohbet · Açık' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
+          grep -q 'maxOutputToken = 192' app/src/main/java/com/kizilelma/mobile/assistant/LocalLlmEngine.kt
+          grep -q 'startVoiceInput()' app/src/main/java/com/kizilelma/mobile/MainActivity.kt
           python3 -c "import xml.etree.ElementTree as E; from pathlib import Path; [E.parse(p) for p in Path('app/src/main').rglob('*.xml')]"
 
       - name: Run unit tests and build debug APK
@@ -72,7 +84,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: KizilElmaMobil-0.7.1-debug
+          name: KizilElmaMobil-0.7.2-debug
           path: kizil-work/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
