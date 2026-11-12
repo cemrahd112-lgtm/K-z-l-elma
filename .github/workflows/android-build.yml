@@ -41,6 +41,20 @@ jobs:
           test -f kizil-work/gradlew
           chmod +x kizil-work/gradlew
 
+      - name: Fix LiteRT-LM Message text extraction
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path("kizil-work/app/src/main/java/com/kizilelma/mobile/assistant/LocalLlmEngine.kt")
+          content = source.read_text()
+          broken = "activeConversation.sendMessage(safePrompt).text.trim()"
+          fixed = "activeConversation.sendMessage(safePrompt).toString().trim()"
+          if broken not in content:
+              raise SystemExit("Expected LiteRT-LM Message.text expression was not found; refusing an unverified patch")
+          source.write_text(content.replace(broken, fixed, 1))
+          print("Patched Message.text to Message.toString()")
+          PY
+
       - name: Run unit tests and build debug APK
         working-directory: kizil-work
         run: ./gradlew --no-daemon --stacktrace :app:clean :app:testDebugUnitTest :app:assembleDebug
