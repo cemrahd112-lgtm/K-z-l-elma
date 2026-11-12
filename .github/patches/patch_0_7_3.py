@@ -113,7 +113,7 @@ class AutonomousSessionService : Service() {
 """)
 
 # SpeechRecognizer errors 11-13 must give an explicit offline Turkish pack instruction.
-val oldErrorStart = '                                val explanation = when (error) {'
+oldErrorStart = '                                val explanation = when (error) {'
 i = m.find(oldErrorStart)
 if i < 0:
     raise SystemExit("v0.7.1 speech error explanation block missing")
