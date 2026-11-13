@@ -93,7 +93,8 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     private fun beginListen() {
         if (!voiceLoop || !hasVoiceModels() || speech != null || processing) return
         try {
-            val recognizer = Recognizer(voskModel, 16000.0f)
+            val activeVoskModel = voskModel ?: run { voiceLoop = false; statusText = "STT modeli yüklenmedi"; return }
+            val recognizer = Recognizer(activeVoskModel, 16000.0f)
             val handled = AtomicBoolean(false)
             speech = SpeechService(recognizer, 16000.0f).also { service ->
                 service.startListening(object : RecognitionListener {
